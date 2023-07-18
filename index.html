@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mass Mail Dispatcher</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #72a5d1;
+        color: #564f4f;
+    }
+    
+    h1 {
+        font-size: 36px;
+        font-family: 'Helvetica', sans-serif;
+        color: #333;
+        text-align: center;
+        /* margin-top: 50px; */
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    form {
+        margin: 0 auto;
+        max-width: 500px;
+        background-color: #FFF;
+        padding: 30px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+         background-color: #EEE;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    input[type="text"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        border: 1px solid #CCC;
+        font-size: 16px;
+    }
+    input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        border: 1px solid #CCC;
+        font-size: 16px;
+        background-color: #F5F5F5;
+        cursor: pointer;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+        background-color: #4CAF50;
+        color: #FFF;
+        border: none;
+        border-radius: 3px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    input[type="file"]::-webkit-file-upload-button:hover {
+        background-color: #2E8B57;
+    }
+    
+    button {
+        display: block;
+        margin: 0 auto;
+        padding: 10px 20px;
+        background-color: #149ad7;
+        color: #FFF;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s ease;
+    }
+    
+    button:hover {
+        background-color: #46c1dd;
+    }
+    
+    .textareas {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        background-color: #FFF;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    
+    .textareas label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        flex: 1 1 100%;
+    }
+    
+    .textareas textarea {
+        flex: 1 1 100%;
+        margin-bottom: 20px;
+        border-radius: 3px;
+        border: 1px solid #CCC;
+        font-size: 16px;
+    }
+    
+    
+    @media (max-width: 500px) {
+        form, .textareas {
+        max-width: 90%;
+        }
+    }
+  </style>
+</head>
+<body>
+  
+  <form method="post" id="myform" enctype="multipart/form-data" >
+    <h1 style="color:rgb(54, 51, 51)">Mass Mail Dispatcher</h1>
+    <hr><br>
+    <label for="from">From:</label>
+    <input type="text" id="from" name="from" placeholder = "Enter From Email" required>
+    
+   
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" placeholder = "Enter From Name" required>
+    
+
+    <label for="subject">Subject:</label>
+    <input type="text" id="emailSubject" name="emailSubject" placeholder = "Enter the Subject" required>
+    
+    <label for="message">Message:</label>
+    <textarea id="emailBody" name="emailBody" placeholder = "Enter your Message....." rows="5" required></textarea>
+    
+    <label for="csvfile">Select CSV File of Email-Ids:</label>
+    <input type="file" id="csvfile" name="csvfile" accept=".csv" onchange="onChangeValidCheck(this)">
+    
+    <button type="button" id="btnSubmit" onclick="sendEmails()">Send</button>
+    
+    <div class="textareas">
+        <label for="validemails">Valid Email Addresses:</label>
+        <textarea id="validemails" name="validemails"></textarea>
+
+        <label for="invalidemails">Invalid Email Addresses:</label>
+        <textarea id="invalidemails" name="invalidemails"></textarea>
+    </div>
+  </form>
+<footer style="background-color: #ffffff; color: #4e4949; text-align: center; padding: 20px; margin-top: 50px;">
+  &copy; Adithya | adithyahebbar32@gmail.com
+</footer>
+
+<script
+      src="https://code.jquery.com/jquery-3.2.1.min.js">
+</script>
+
+<script type="text/javascript">
+
+</script>
+
+<script type="text/javascript">
+    var validEmails = [];
+    var invalidEmails = [];
+    function onChangeValidCheck(filess) {
+        validEmails = []
+        invalidEmails = []
+        var file = filess.files[0];
+        var reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = function(event) {
+            var csv = event.target.result;
+            var lines = csv.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+            var email = lines[i].trim();
+            var emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,3}$/;
+            if (emailRegex.test(email)) {
+                validEmails.push(email);
+            } else {
+                invalidEmails.push(email);
+            }
+        }
+        $('#validemails').val(validEmails.join("  "));
+        $('#invalidemails').val(invalidEmails.join("   "));
+        };
+        }
+
+    function sendEmails() {
+    var subject = document.getElementById("emailSubject").value;
+    var message = document.getElementById("emailBody").value;
+    var fromName = document.getElementById("name").value;
+    var fromMail = document.getElementById("from").value;
+
+    const data = { 
+        name: fromName,
+        fromMail:fromMail,
+        subject:subject,
+        message:message,
+        validEmails:validEmails,
+        invalidEmails:invalidEmails,
+    };
+
+    fetch('http://localhost:3000/api/users', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => alert(data.message))
+    .catch(error => console.error(error));
+
+};
+</script>
+
+</body>
+</html>
